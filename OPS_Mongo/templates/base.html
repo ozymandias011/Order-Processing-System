@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Order Processing System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            font-family: 'Roboto', Arial, sans-serif;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #6366f1 0%, #0ea5e9 100%) !important;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.15);
+        }
+        .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            letter-spacing: 2px;
+        }
+        .nav-link {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #fff !important;
+            transition: color 0.2s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #ffe066 !important;
+        }
+        .container {
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: #3730a3;
+            margin-bottom: 1rem;
+        }
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 2px 16px rgba(99,102,241,0.08);
+            margin-bottom: 2rem;
+            background: #fff;
+        }
+        .table {
+            border-radius: 1rem;
+            overflow: hidden;
+            background: #fff;
+        }
+        .table th {
+            background: #6366f1;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .btn-primary, .btn-info, .btn-secondary, .btn-danger {
+            border-radius: 2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: box-shadow 0.2s, background 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #6366f1 0%, #0ea5e9 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #0ea5e9 0%, #6366f1 100%);
+            box-shadow: 0 2px 8px #6366f1aa;
+        }
+        .btn-info {
+            background: #0ea5e9;
+            border: none;
+        }
+        .btn-info:hover {
+            background: #6366f1;
+        }
+        .btn-danger {
+            background: #ef4444;
+            border: none;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .form-label, .form-select, .form-control {
+            font-size: 1.05rem;
+        }
+        .form-select, .form-control {
+            border-radius: 1.5rem;
+            border: 1px solid #6366f1;
+            box-shadow: none;
+        }
+        .form-select:focus, .form-control:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 0.2rem #6366f133;
+        }
+        .table-bordered > :not(caption) > * > * {
+            border-width: 0 0 1px 0;
+        }
+        .table-bordered th, .table-bordered td {
+            border-bottom: 1px solid #e0e7ff !important;
+        }
+        .text-end {
+            text-align: right !important;
+        }
+        .mb-3, .my-3 {
+            margin-bottom: 1.5rem !important;
+        }
+        .card-header {
+            background: linear-gradient(90deg, #6366f1 0%, #0ea5e9 100%);
+            color: #fff;
+            font-weight: 600;
+            border-radius: 1rem 1rem 0 0;
+        }
+        .fade-in {
+            animation: fadeIn 0.7s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: none;}
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #6366f1;
+            font-size: 1.3rem;
+            transition: color 0.2s;
+        }
+        .icon-btn:hover {
+            color: #0ea5e9;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark mb-4 shadow">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('index') }}"><i class="bi bi-box-seam"></i> Vishal Mega Mart</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link {% if request.endpoint=='customers' %}active{% endif %}" href="{{ url_for('customers') }}"><i class="bi bi-people"></i> Customers</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.endpoint=='products' %}active{% endif %}" href="{{ url_for('products') }}"><i class="bi bi-bag"></i> Products</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.endpoint=='place_order' %}active{% endif %}" href="{{ url_for('place_order') }}"><i class="bi bi-cart-plus"></i> Place Order</a></li>
+                <li class="nav-item"><a class="nav-link {% if request.endpoint=='customer_summary' %}active{% endif %}" href="{{ url_for('customer_summary') }}"><i class="bi bi-bar-chart"></i> Customer Summary</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container fade-in">
+    {% block content %}{% endblock %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

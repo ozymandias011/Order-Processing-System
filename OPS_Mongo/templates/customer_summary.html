@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="mb-4 rounded-4 overflow-hidden"
+    style="background: linear-gradient(90deg, #6366f1cc 60%, #0ea5e9cc 100%), url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80') center/cover; min-height: 180px;">
+    <div class="p-5 text-white">
+        <h2 class="display-5 fw-bold mb-1"><i class="bi bi-bar-chart"></i> Customer Summary</h2>
+        <p class="lead mb-0">See order stats and spending for each customer.</p>
+    </div>
+</div>
+
+<!-- Summary Statistics Box -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-gradient-primary text-white shadow-lg border-0">
+            <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="bi bi-currency-rupee fs-1 me-2"></i>
+                    <div>
+                        <h3 class="card-title mb-0">{{ "%.2f"|format(total_revenue) }}</h3>
+                        <p class="card-text mb-0">Total Revenue</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-gradient-success text-white shadow-lg border-0">
+            <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="bi bi-people fs-1 me-2"></i>
+                    <div>
+                        <h3 class="card-title mb-0">{{ total_customers }}</h3>
+                        <p class="card-text mb-0">Total Customers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-gradient-info text-white shadow-lg border-0">
+            <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="bi bi-cart-check fs-1 me-2"></i>
+                    <div>
+                        <h3 class="card-title mb-0">{{ total_orders }}</h3>
+                        <p class="card-text mb-0">Total Orders</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 shadow-lg border-0">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Customer ID</th>
+                <th>Name</th>
+                <th>Total Orders</th>
+                <th>Total Spent</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in summary %}
+            <tr>
+                <td>
+                    <img src="https://ui-avatars.com/api/?name={{ c.Name|urlencode }}&background=6366f1&color=fff&rounded=true&size=36"
+                        alt="Avatar" class="shadow-sm" style="width:36px; height:36px;">
+                </td>
+                <td class="text-muted fw-semibold">#{{ c.CustomerID }}</td>
+                <td class="fw-semibold">{{ c.Name }}</td>
+                <td>{{ c.TotalOrders }}</td>
+                <td>₹{{ "%.2f"|format(c.TotalSpent) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="text-center my-3">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg px-4"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+.bg-gradient-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+.bg-gradient-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

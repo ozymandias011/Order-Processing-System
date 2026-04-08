@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card p-5 text-center shadow">
+    <h1 class="mb-4"><i class="bi bi-box-seam"></i> Welcome to the Vishal Mega Mart's Order Processing System</h1>
+    <p class="lead mb-4">Use the navigation menu to manage customers, products, and orders.</p>
+    <div class="row justify-content-center">
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('customers') }}" class="btn btn-primary w-100 py-2"><i class="bi bi-people"></i> Customers</a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('products') }}" class="btn btn-primary w-100 py-2"><i class="bi bi-bag"></i> Products</a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('place_order') }}" class="btn btn-primary w-100 py-2"><i class="bi bi-cart-plus"></i> Place Order</a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('customer_summary') }}" class="btn btn-primary w-100 py-2"><i class="bi bi-bar-chart"></i> Customer Summary</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

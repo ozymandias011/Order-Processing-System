@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="mb-4 rounded-4 overflow-hidden"
+    style="background: linear-gradient(90deg, #6366f1cc 60%, #0ea5e9cc 100%), url('https://images.unsplash.com/photo-1515169067865-5387a5d7b59a?auto=format&fit=crop&w=1200&q=80') center/cover; min-height: 180px;">
+    <div class="p-5 text-white">
+        <h2 class="display-5 fw-bold mb-1"><i class="bi bi-cart-plus"></i> Place a New Order</h2>
+        <p class="lead mb-0">Select customer and products to create a new order.</p>
+    </div>
+</div>
+
+<div class="card p-4 shadow-lg border-0">
+    <form method="POST" onsubmit="return filterOrderItems()">
+        <div class="mb-3">
+            <label for="customer" class="form-label">Select Customer</label>
+            <div class="d-flex gap-2">
+                <select class="form-select" id="customer" name="customer" required>
+                    <option value="" selected disabled>Select customer</option>
+                    {% for c in customers %}
+                    <option value="{{ c._id }}">{{ c.Name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newCustomerModal">
+                    <i class="bi bi-person-plus"></i> New Customer
+                </button>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="product-cards">
+            {% for p in products %}
+            <div class="col d-flex flex-column align-items-center">
+                <div class="card h-100 order-product-card text-center p-2 w-100">
+                    <div class="position-relative">
+                        <img src="{{ p.ImageURL or 'https://via.placeholder.com/120' }}" class="card-img-top mx-auto d-block" alt="{{ p.product_name }}" style="width:120px;height:120px;object-fit:contain;">
+                        {% if p.Discount %}
+                        <span class="badge bg-primary position-absolute top-0 start-0 m-2">{{ p.Discount }}% Off</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-title mb-1">{{ p.productName }}</h6>
+                        <div class="text-success fw-semibold mb-1" style="font-size:1.1em;">₹{{ p.price }}</div>
+                        <div class="text-muted mb-2" style="font-size:0.95em;">stock: {{ p.stock }}</div>
+                        <div class="mb-2">
+                            <label for="quantity_{{ p._id }}" class="form-label mb-1" style="font-size:0.95em;">Quantity</label>
+                            <input type="number" min="0" max="{{ p.stock }}" value="0" name="quantity_{{ p._id }}" id="quantity_{{ p._id }}" class="form-control form-control-lg text-center quantity-input" style="width:70px; margin: 0 auto; font-size:1.2em;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <br />
+        <button type="submit" class="btn btn-primary"><i class="bi bi-cart-check"></i> Place Order</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+    </form>
+</div>
+<style>
+.order-product-card {
+    background: #f8fafc;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px #0001;
+    transition: box-shadow 0.2s;
+}
+.order-product-card:hover {
+    box-shadow: 0 4px 16px #0002;
+}
+.card-img-top {
+    margin-top: 10px;
+}
+.quantity-input {
+    height: 48px;
+    font-size: 1.2em;
+    border: 2px solid #6366f1;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px #6366f122;
+}
+</style>
+<script>
+function filterOrderItems() {
+    const qtyInputs = document.querySelectorAll('input[type="number"]');
+    let atLeastOne = false;
+    
+    qtyInputs.forEach(input => {
+        if (parseInt(input.value) > 0) {
+            atLeastOne = true;
+        }
+    });
+    
+    if (!atLeastOne) {
+        alert('Please select at least one product with quantity greater than 0.');
+        return false;
+    }
+    return true;
+}
+</script>
+
+<!-- New Customer Modal -->
+<div class="modal fade" id="newCustomerModal" tabindex="-1" aria-labelledby="newCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newCustomerModalLabel">
+                    <i class="bi bi-person-plus"></i> Add New Customer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="newCustomerForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newCustomerName" class="form-label">Customer Name</label>
+                        <input type="text" class="form-control" id="newCustomerName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newCustomerEmail" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="newCustomerEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newCustomerPhone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="newCustomerPhone" name="phone">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add Customer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('newCustomerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('/add_customer', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Add new customer to the dropdown
+            const select = document.getElementById('customer');
+            const option = document.createElement('option');
+            option.value = data.customer_id;
+            option.textContent = data.customer_name;
+            select.appendChild(option);
+            
+            // Select the new customer
+            select.value = data.customer_id;
+            
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newCustomerModal'));
+            modal.hide();
+            this.reset();
+            
+            // Show success message
+            alert('Customer added successfully!');
+        } else {
+            alert('Error adding customer: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding customer. Please try again.');
+    });
+});
+</script>
+{% endblock %}

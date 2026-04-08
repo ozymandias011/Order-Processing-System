@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="mb-4 rounded-4 overflow-hidden"
+    style="background: linear-gradient(90deg, #6366f1cc 60%, #0ea5e9cc 100%), url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') center/cover; min-height: 180px;">
+    <div class="p-5 text-white">
+        <h2 class="display-5 fw-bold mb-1"><i class="bi bi-bag"></i> Products</h2>
+        <p class="lead mb-0">Browse and manage your product catalog.</p>
+    </div>
+</div>
+
+<style>
+#sortPrice {
+    transition: all 0.2s ease;
+}
+#sortPrice:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 4px;
+    transform: scale(1.1);
+}
+#sortPrice:active {
+    transform: scale(0.95);
+}
+.table th {
+    user-select: none;
+}
+.delete-btn {
+    transition: all 0.2s ease;
+}
+.delete-btn:hover {
+    background-color: #dc3545 !important;
+    transform: scale(1.05);
+}
+.delete-btn:active {
+    transform: scale(0.95);
+}
+.edit-stock-btn {
+    transition: all 0.2s ease;
+}
+.edit-stock-btn:hover {
+    transform: scale(1.05);
+}
+.save-stock-btn, .cancel-stock-btn {
+    transition: all 0.2s ease;
+}
+.save-stock-btn:hover, .cancel-stock-btn:hover {
+    transform: scale(1.05);
+}
+.stock-input {
+    transition: all 0.2s ease;
+}
+.stock-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+    border-color: #6366f1;
+}
+</style>
+
+<div class="card p-4 shadow-lg border-0">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th></th>
+                <th class="text-white">Name</th>
+                <th class="text-white">
+                    Price 
+                    <button id="sortPrice" class="btn btn-sm p-0 ms-1 text-white border-0" style="background: none;" title="Sort by Price">
+                        <i id="sortIcon" class="bi bi-arrow-down-up"></i>
+                    </button>
+                </th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in products %}
+            <tr>
+                <td>
+                    <img src="https://source.unsplash.com/48x48/?product,{{ p.ProductName|urlencode }}" alt="Product" class="rounded shadow-sm" style="width:48px; height:48px; object-fit:cover;">
+                </td>
+                <td class="fw-semibold">{{ p.productName }}</td>
+                <td>₹{{ "%.2f"|format(p.price) }}</td>
+                <td>
+                    <div class="stock-display" id="stock-display-{{ p.ProductID }}">
+                        {% if p.stock > 0 %}
+                            <span class="badge bg-success">{{ p.stock }}</span>
+                        {% else %}
+                            <span class="badge bg-danger">Out of Stock</span>
+                        {% endif %}
+                        <button type="button" class="btn btn-sm btn-outline-primary ms-2 edit-stock-btn" data-product-id="{{ p.ProductID }}" data-current-stock="{{ p.Stock }}" title="Edit Stock">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                    <div class="stock-edit" id="stock-edit-{{ p.ProductID }}" style="display: none;">
+                        <div class="d-flex align-items-center">
+                            <input type="number" min="0" class="form-control form-control-sm stock-input" id="stock-input-{{ p.ProductID }}" value="{{ p.Stock }}" style="width: 80px;">
+                            <button type="button" class="btn btn-sm btn-success ms-1 save-stock-btn" data-product-id="{{ p.ProductID }}" title="Save">
+                                <i class="bi bi-check"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-secondary ms-1 cancel-stock-btn" data-product-id="{{ p.ProductID }}" title="Cancel">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm delete-btn" data-product-id="{{ p.ProductID }}" data-product-name="{{ p.ProductName }}" title="Delete Product">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="text-center my-3">
+        <button type="button" class="btn btn-primary btn-lg px-4 me-2" data-bs-toggle="modal" data-bs-target="#newProductModal">
+            <i class="bi bi-plus-circle"></i> Add New Product
+        </button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg px-4"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+
+<!-- New Product Modal -->
+<div class="modal fade" id="newProductModal" tabindex="-1" aria-labelledby="newProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newProductModalLabel">
+                    <i class="bi bi-plus-circle"></i> Add New Product
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="newProductForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newProductName" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="newProductName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newProductPrice" class="form-label">Price (₹)</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="newProductPrice" name="price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newProductStock" class="form-label">Stock Quantity</label>
+                        <input type="number" min="0" class="form-control" id="newProductStock" name="stock" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Price sorting functionality
+let currentSortOrder = 'none'; // 'none', 'asc', 'desc'
+
+document.getElementById('sortPrice').addEventListener('click', function() {
+    const table = document.querySelector('table tbody');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    const sortIcon = document.getElementById('sortIcon');
+    
+    // Cycle through sort orders: none -> asc -> desc -> none
+    if (currentSortOrder === 'none') {
+        currentSortOrder = 'asc';
+        sortIcon.className = 'bi bi-arrow-up';
+        sortIcon.parentElement.title = 'Sorted: Low to High';
+    } else if (currentSortOrder === 'asc') {
+        currentSortOrder = 'desc';
+        sortIcon.className = 'bi bi-arrow-down';
+        sortIcon.parentElement.title = 'Sorted: High to Low';
+    } else {
+        currentSortOrder = 'none';
+        sortIcon.className = 'bi bi-arrow-down-up';
+        sortIcon.parentElement.title = 'Sort by Price';
+        // Reset to original order - reload the page
+        location.reload();
+        return;
+    }
+    
+    // Sort rows based on price
+    rows.sort((a, b) => {
+        const priceA = parseFloat(a.cells[2].textContent.replace('₹', ''));
+        const priceB = parseFloat(b.cells[2].textContent.replace('₹', ''));
+        
+        if (currentSortOrder === 'asc') {
+            return priceA - priceB;
+        } else {
+            return priceB - priceA;
+        }
+    });
+    
+    // Re-append sorted rows
+    rows.forEach(row => table.appendChild(row));
+});
+
+// Product deletion functionality
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const productName = this.getAttribute('data-product-name');
+            
+            if (confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+                fetch('/delete_product', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: productId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Product deleted successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error deleting product: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting product. Please try again.');
+                });
+            }
+        });
+    });
+
+    // Stock editing functionality
+    document.querySelectorAll('.edit-stock-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const stockDisplay = document.getElementById(`stock-display-${productId}`);
+            const stockEdit = document.getElementById(`stock-edit-${productId}`);
+            
+            stockDisplay.style.display = 'none';
+            stockEdit.style.display = 'block';
+            
+            // Focus on input
+            const input = document.getElementById(`stock-input-${productId}`);
+            input.focus();
+            input.select();
+        });
+    });
+
+    document.querySelectorAll('.save-stock-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const input = document.getElementById(`stock-input-${productId}`);
+            const newStock = input.value;
+            
+            // Validate input
+            if (newStock === '' || isNaN(newStock) || parseInt(newStock) < 0) {
+                alert('Please enter a valid stock quantity (0 or greater)');
+                return;
+            }
+            
+            // Send update request
+            fetch('/update_stock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    new_stock: parseInt(newStock)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the display
+                    const stockDisplay = document.getElementById(`stock-display-${productId}`);
+                    const stockEdit = document.getElementById(`stock-edit-${productId}`);
+                    
+                    // Update badge
+                    const badge = stockDisplay.querySelector('.badge');
+                    if (data.new_stock > 0) {
+                        badge.className = 'badge bg-success';
+                        badge.textContent = data.new_stock;
+                    } else {
+                        badge.className = 'badge bg-danger';
+                        badge.textContent = 'Out of Stock';
+                    }
+                    
+                    // Update edit button data
+                    const editBtn = stockDisplay.querySelector('.edit-stock-btn');
+                    editBtn.setAttribute('data-current-stock', data.new_stock);
+                    
+                    // Show display, hide edit
+                    stockDisplay.style.display = 'block';
+                    stockEdit.style.display = 'none';
+                    
+                    // Show success message
+                    alert('Stock updated successfully!');
+                } else {
+                    alert('Error updating stock: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating stock. Please try again.');
+            });
+        });
+    });
+
+    document.querySelectorAll('.cancel-stock-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const stockDisplay = document.getElementById(`stock-display-${productId}`);
+            const stockEdit = document.getElementById(`stock-edit-${productId}`);
+            const input = document.getElementById(`stock-input-${productId}`);
+            const editBtn = stockDisplay.querySelector('.edit-stock-btn');
+            
+            // Reset input to original value
+            input.value = editBtn.getAttribute('data-current-stock');
+            
+            // Show display, hide edit
+            stockDisplay.style.display = 'block';
+            stockEdit.style.display = 'none';
+        });
+    });
+
+    // Allow Enter key to save and Escape key to cancel
+    document.querySelectorAll('.stock-input').forEach(input => {
+        input.addEventListener('keydown', function(e) {
+            const productId = this.id.replace('stock-input-', '');
+            
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.querySelector(`.save-stock-btn[data-product-id="${productId}"]`).click();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                document.querySelector(`.cancel-stock-btn[data-product-id="${productId}"]`).click();
+            }
+        });
+    });
+});
+</script>
+
+<script>
+document.getElementById('newProductForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('/add_product', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newProductModal'));
+            modal.hide();
+            this.reset();
+            
+            // Show success message and reload page to show new product
+            alert('Product added successfully!');
+            location.reload();
+        } else {
+            alert('Error adding product: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding product. Please try again.');
+    });
+});
+</script>
+{% endblock %}

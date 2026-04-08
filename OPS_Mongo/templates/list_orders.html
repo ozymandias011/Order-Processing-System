@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="mb-4 rounded-4 overflow-hidden"
+    style="background: linear-gradient(90deg, #6366f1cc 60%, #0ea5e9cc 100%), url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80') center/cover; min-height: 180px;">
+    <div class="p-5 text-white">
+        <h2 class="display-5 fw-bold mb-1"><i class="bi bi-card-list"></i> Orders for {{ customer.Name }}</h2>
+        <p class="lead mb-0">View and manage all orders for this customer.</p>
+    </div>
+</div>
+
+<div class="card p-4 shadow-lg border-0">
+    {% if orders %}
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Details</th>
+                <th>Cancel</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order._id }}</td>
+                <td>{{ (order.orderDate or order.OrderDate).strftime('%Y-%m-%d') if (order.orderDate or order.OrderDate) else 'N/A' }}</td>
+                <td>
+                    {% if order.status or order.Status == 'Cancelled' %}
+                        <span class="badge bg-danger">{{ order.status or order.Status }}</span>
+                    {% else %}
+                        <span class="badge bg-success">{{ order.status or order.Status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('order_details', order_id=order._id) }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                </td>
+                <td>
+                    {% if (order.status or order.Status) != 'Cancelled' and (order.status or order.Status) != 'Delivered' %}
+                    <a href="{{ url_for('cancel_order', order_id=order._id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this order?');">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    {% else %}
+                    <span class="text-muted"><i class="bi bi-x-octagon"></i> Cancelled</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No orders found for this customer.</p>
+    {% endif %}
+    <div class="text-center my-3">
+        <a href="{{ url_for('customers') }}" class="btn btn-secondary btn-lg px-4"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+</div>
+{% endblock %}

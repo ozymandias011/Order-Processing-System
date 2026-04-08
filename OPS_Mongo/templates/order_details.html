@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="mb-4 rounded-4 overflow-hidden"
+    style="background: linear-gradient(90deg, #6366f1cc 60%, #0ea5e9cc 100%), url('https://images.unsplash.com/photo-1515169067865-5387a5d7b59a?auto=format&fit=crop&w=1200&q=80') center/cover; min-height: 180px;">
+    <div class="p-5 text-white">
+        <h2 class="display-5 fw-bold mb-1"><i class="bi bi-receipt"></i> Order Details (#{{ order._id if order else 'N/A' }})</h2>
+        <p class="lead mb-0">See all items and totals for this order.</p>
+    </div>
+</div>
+
+<div class="card p-4 shadow-lg border-0">
+    <div class="mb-3">
+        <span class="fw-bold"><i class="bi bi-person"></i> Customer:</span> {{ customer.Name if customer and customer.Name else 'N/A' }}<br>
+        <span class="fw-bold"><i class="bi bi-calendar"></i> Date:</span> {{ (order.orderDate or order.OrderDate).strftime('%Y-%m-%d') if order and (order.orderDate or order.OrderDate) else 'N/A' }}<br>
+        <span class="fw-bold"><i class="bi bi-info-circle"></i> Status:</span>
+        {% set current_status = (order.status or order.Status) if order else 'N/A' %}
+        {% if current_status == 'Cancelled' %}
+            <span class="badge bg-danger">{{ current_status }}</span>
+        {% elif current_status != 'N/A' %}
+            <span class="badge bg-success">{{ current_status }}</span>
+        {% else %}
+            <span class="badge bg-secondary">{{ current_status }}</span>
+        {% endif %}
+    </div>
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                {% set resolved_product_name = item.productName if item.productName is defined else item.ProductName %}
+                {% set resolved_price = item.price if item.price is defined else item.Price if item.Price is defined else 0 %}
+                {% set resolved_quantity = item.quantity if item.quantity is defined else item.Quantity if item.Quantity is defined else 0 %}
+                <td>
+                    <img src="https://source.unsplash.com/32x32/?product,{{ resolved_product_name|urlencode if resolved_product_name else 'product' }}" alt="Product" class="rounded me-2" style="width:32px; height:32px; object-fit:cover;">
+                    {{ resolved_product_name if resolved_product_name else "N/A" }}
+                </td>
+                <td>₹{{ "%.2f"|format(resolved_price) }}</td>
+                <td>{{ resolved_quantity }}</td>
+                <td>₹{{ "%.2f"|format(resolved_price * resolved_quantity) }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                <td><strong>₹{{ "%.2f"|format(total) }}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="text-center my-3">
+        <a href="{{ url_for('list_orders', customer_id=(customer._id if customer else (order.customer_id if order and order.customer_id else (order.customerId if order and order.customerId else '')))) }}" class="btn btn-secondary btn-lg px-4"><i class="bi bi-arrow-left"></i> Back to Orders</a>
+    </div>
+</div>
+{% endblock %}
